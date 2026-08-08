@@ -3,7 +3,7 @@ from django.db import models
 
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self, first_name, last_name, email, password=None):
+    def create_user(self, first_name, last_name, email,username, password=None):
         if not email:
             raise ValueError('User must have an email address')
 
@@ -11,15 +11,17 @@ class MyAccountManager(BaseUserManager):
             email=self.normalize_email(email),
             first_name=first_name,
             last_name=last_name,
+            username=username,
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, first_name, last_name, email, password=None):
+    def create_superuser(self, first_name, last_name, email,username, password=None):
         user = self.create_user(
             email=self.normalize_email(email),
             password=password,
+            username=username,
             first_name=first_name,
             last_name=last_name,
         )
@@ -34,6 +36,7 @@ class MyAccountManager(BaseUserManager):
 class Account(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    username = models.CharField(max_length=50,unique=True)
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=50, blank=True)
 
@@ -45,7 +48,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_superadmin = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
 
     objects = MyAccountManager()
 
